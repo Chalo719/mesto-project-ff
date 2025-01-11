@@ -28,6 +28,7 @@
   .header {
     min-height: 85px;
   }
+
   .header::before {
     width: calc(100% + 40px);
   }
