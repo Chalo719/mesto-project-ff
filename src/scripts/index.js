@@ -1,3 +1,6 @@
+import '../pages/index.css';
+import initialCards from './cards';
+
 const placesList = document.querySelector('.places__list');
 const cardTemplate = document.querySelector('#card-template').content;
 
@@ -21,4 +24,4 @@ function deleteCard(cardElement) {
   cardElement.remove();
 }
 
-initialCards.forEach(card => placesList.append(makeCard(card, deleteCard))); // initialCards из scripts/cards.js
+initialCards.forEach(card => placesList.append(makeCard(card, deleteCard)));
