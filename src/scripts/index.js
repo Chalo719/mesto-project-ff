@@ -1,27 +1,56 @@
 import '../pages/index.css';
 import initialCards from './cards';
+import { makeCard, deleteCard, likeCard, setImageToModal } from './card';
+import { openModal, closeModal } from './modal';
+import { handleEditProfileFormSubmit, handleNewPlaceFormSubmit } from './forms';
 
 const placesList = document.querySelector('.places__list');
-const cardTemplate = document.querySelector('#card-template').content;
 
-function makeCard(cardData, deleteFunc) {
-  const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
+const editProfileButton = document.querySelector('.profile__edit-button');
+const editProfileModal = document.querySelector('.popup_type_edit');
 
-  const cardElementImage = cardElement.querySelector('.card__image');
-  const cardElementTitle = cardElement.querySelector('.card__title');
-  const cardElementDeleteButton = cardElement.querySelector('.card__delete-button');
+const addNewCardButton = document.querySelector('.profile__add-button');
+const addNewCardModal = document.querySelector('.popup_type_new-card');
 
-  cardElementImage.src = cardData.link;
-  cardElementImage.alt = cardData.name;
-  cardElementTitle.textContent = cardData.name;
+const showImageModal = document.querySelector('.popup_type_image');
 
-  cardElementDeleteButton.addEventListener('click', () => deleteFunc(cardElement));
+const profileTitle = document.querySelector('.profile__title');
+const profileDescription = document.querySelector('.profile__description');
 
-  return cardElement;
-}
+const editProfileForm = document.forms['edit-profile'];
+const nameInput = editProfileForm.elements.name;
+const descriptionInput = editProfileForm.elements.description;
 
-function deleteCard(cardElement) {
-  cardElement.remove();
-}
+const newPlaceForm = document.forms['new-place'];
+const placeNameInput = newPlaceForm.elements['place-name'];
+const placeLinkInput = newPlaceForm.elements.link;
 
-initialCards.forEach(card => placesList.append(makeCard(card, deleteCard)));
+const prependNewCard = cardData => placesList.prepend(makeCard(cardData, deleteCard, likeCard, setImageToModal));
+
+initialCards.forEach(prependNewCard);
+
+[editProfileModal, addNewCardModal, showImageModal].forEach(modal => modal.classList.add('popup_is-animated'));
+
+editProfileButton.addEventListener('click', () => {
+  nameInput.value = profileTitle.textContent;
+  descriptionInput.value = profileDescription.textContent;
+  openModal(editProfileModal);
+});
+
+addNewCardButton.addEventListener('click', () => openModal(addNewCardModal));
+
+placesList.addEventListener('click', evt => {
+  if (evt.target.classList.contains('card__image')) openModal(showImageModal);
+});
+
+editProfileForm.addEventListener('submit', evt => {
+  handleEditProfileFormSubmit(evt, nameInput, descriptionInput, profileTitle, profileDescription);
+  closeModal(editProfileModal);
+});
+
+newPlaceForm.addEventListener('submit', evt => {
+  const newCardData = handleNewPlaceFormSubmit(evt, placeNameInput, placeLinkInput);
+  prependNewCard(newCardData);
+  closeModal(addNewCardModal);
+  newPlaceForm.reset();
+});
