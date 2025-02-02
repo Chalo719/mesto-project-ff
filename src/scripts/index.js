@@ -1,10 +1,11 @@
 import '../pages/index.css';
 import initialCards from './cards';
-import { makeCard, deleteCard, likeCard, setImageToModal } from './card';
+import { makeCard, deleteCard, likeCard } from './card';
 import { openModal, closeModal } from './modal';
 import { handleEditProfileFormSubmit, handleNewPlaceFormSubmit } from './forms';
 
 const placesList = document.querySelector('.places__list');
+const modals = document.querySelectorAll('.popup');
 
 const editProfileButton = document.querySelector('.profile__edit-button');
 const editProfileModal = document.querySelector('.popup_type_edit');
@@ -25,11 +26,45 @@ const newPlaceForm = document.forms['new-place'];
 const placeNameInput = newPlaceForm.elements['place-name'];
 const placeLinkInput = newPlaceForm.elements.link;
 
-const prependNewCard = cardData => placesList.prepend(makeCard(cardData, deleteCard, likeCard, setImageToModal));
+const popupImageElement = document.querySelector('.popup__image');
+const popupCaptionElement = document.querySelector('.popup__caption');
+
+const setImageToModal = evt => {
+  const currentImage = evt.currentTarget;
+
+  popupImageElement.src = currentImage.src;
+  popupImageElement.alt = currentImage.alt;
+  popupCaptionElement.textContent = currentImage.alt;
+};
+
+const handleImageClick = evt => {
+  setImageToModal(evt);
+  openModal(showImageModal);
+};
+
+const cardFuncs = {
+  deleteFunc: deleteCard,
+  likeFunc: likeCard,
+  imageFunc: handleImageClick
+};
+
+const prependNewCard = cardData => placesList.prepend(makeCard(cardData, cardFuncs));
 
 initialCards.forEach(prependNewCard);
 
-[editProfileModal, addNewCardModal, showImageModal].forEach(modal => modal.classList.add('popup_is-animated'));
+modals.forEach(modal => {
+  modal.classList.add('popup_is-animated');
+
+  modal.addEventListener('mousedown', evt => {
+    if (evt.target.classList.contains('popup_is-opened')) {
+      closeModal(modal);
+    }
+
+    if (evt.target.classList.contains('popup__close')) {
+      closeModal(modal);
+    }
+  });
+});
 
 editProfileButton.addEventListener('click', () => {
   nameInput.value = profileTitle.textContent;
@@ -38,10 +73,6 @@ editProfileButton.addEventListener('click', () => {
 });
 
 addNewCardButton.addEventListener('click', () => openModal(addNewCardModal));
-
-placesList.addEventListener('click', evt => {
-  if (evt.target.classList.contains('card__image')) openModal(showImageModal);
-});
 
 editProfileForm.addEventListener('submit', evt => {
   handleEditProfileFormSubmit(evt, nameInput, descriptionInput, profileTitle, profileDescription);

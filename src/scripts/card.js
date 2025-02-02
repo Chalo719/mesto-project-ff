@@ -1,4 +1,4 @@
-function makeCard(cardData, deleteFunc, likeFunc, setImageFunc) {
+function makeCard(cardData, { deleteFunc, likeFunc, imageFunc }) {
   const cardTemplate = document.querySelector('#card-template').content;
   const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
 
@@ -12,8 +12,8 @@ function makeCard(cardData, deleteFunc, likeFunc, setImageFunc) {
   cardElementTitle.textContent = cardData.name;
 
   cardElementDeleteButton.addEventListener('click', () => deleteFunc(cardElement));
-  cardLikeButton.addEventListener('click', likeFunc);
-  cardElementImage.addEventListener('click', setImageFunc);
+  cardLikeButton.addEventListener('click', () => likeFunc(cardLikeButton));
+  cardElementImage.addEventListener('click', imageFunc);
 
   return cardElement;
 }
@@ -22,19 +22,8 @@ function deleteCard(cardElement) {
   cardElement.remove();
 }
 
-function likeCard(evt) {
-  const likeButton = evt.currentTarget;
+function likeCard(likeButton) {
   likeButton.classList.toggle('card__like-button_is-active');
 }
 
-function setImageToModal(evt) {
-  const currentImage = evt.currentTarget;
-  const popupImageElement = document.querySelector('.popup__image');
-  const popupCaptionElement = document.querySelector('.popup__caption');
-
-  popupImageElement.src = currentImage.src;
-  popupImageElement.alt = currentImage.alt;
-  popupCaptionElement.textContent = currentImage.alt;
-}
-
-export { makeCard, deleteCard, likeCard, setImageToModal };
+export { makeCard, deleteCard, likeCard };
