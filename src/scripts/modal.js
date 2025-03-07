@@ -11,6 +11,9 @@ function openModal(modal) {
 
 function closeModal(modal) {
   document.removeEventListener('keydown', modal._closeByEscape);
+  if (modal._deleteCardForm) {
+    modal._deleteCardForm.removeEventListener('submit', modal._deleteCardListener);
+  }
 
   modal.classList.remove('popup_is-opened');
 }

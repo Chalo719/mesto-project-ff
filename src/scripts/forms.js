@@ -1,17 +1,6 @@
-function handleEditProfileFormSubmit(evt, nameInput, descriptionInput, profileTitle, profileDescription) {
-  evt.preventDefault();
-
-  profileTitle.textContent = nameInput.value;
-  profileDescription.textContent = descriptionInput.value;
+function handleEditProfileFormSubmit(profileData, profileTitle, profileDescription) {
+  profileTitle.textContent = profileData.name;
+  profileDescription.textContent = profileData.about;
 }
 
-function handleNewPlaceFormSubmit(evt, placeNameInput, placeLinkInput) {
-  evt.preventDefault();
-
-  return {
-    name: placeNameInput.value,
-    link: placeLinkInput.value,
-  };
-}
-
-export { handleEditProfileFormSubmit, handleNewPlaceFormSubmit };
+export { handleEditProfileFormSubmit };
