@@ -6,16 +6,19 @@ const config = {
   }
 }
 
+const getResponseData = res => {
+  if (!res.ok) {
+    return Promise.reject(`Ошибка: ${res.status}`);
+  }
+  return res.json();
+}
+
 const getUserInfo = () => {
   return fetch(`${config.baseUrl}/users/me`, {
     headers: config.headers
   })
     .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-
-      return Promise.reject(`Ошибка: ${res.status}`);
+      return getResponseData(res);
     });
 }
 
@@ -24,11 +27,7 @@ const getInitialCards = () => {
     headers: config.headers
   })
     .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-
-      return Promise.reject(`Ошибка: ${res.status}`);
+      return getResponseData(res);
     });
 }
 
@@ -42,11 +41,7 @@ const patchProfile = (name, about) => {
     })
   })
     .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-
-      return Promise.reject(`Ошибка: ${res.status}`);
+      return getResponseData(res);
     });
 }
 
@@ -60,11 +55,7 @@ const postNewCard = (name, link) => {
     })
   })
     .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-
-      return Promise.reject(`Ошибка: ${res.status}`);
+      return getResponseData(res);
     });
 }
 
@@ -74,11 +65,7 @@ const deleteCard = (card) => {
     headers: config.headers,
   })
     .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-
-      return Promise.reject(`Ошибка: ${res.status}`);
+      return getResponseData(res);
     });
 }
 
@@ -88,11 +75,7 @@ const putLike = (card) => {
     headers: config.headers,
   })
     .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-
-      return Promise.reject(`Ошибка: ${res.status}`);
+      return getResponseData(res);
     });
 }
 
@@ -102,11 +85,7 @@ const deleteLike = (card) => {
     headers: config.headers,
   })
     .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-
-      return Promise.reject(`Ошибка: ${res.status}`);
+      return getResponseData(res);
     });
 }
 
@@ -119,25 +98,8 @@ const patchAvatar = (newAvatarUrl) => {
     })
   })
     .then(res => {
-      if (res.ok) {
-        return res.json();
-      }
-
-      return Promise.reject(`Ошибка: ${res.status}`);
+      return getResponseData(res);
     });
 }
 
-const checkImageUrl = (url) => {
-  return fetch(url, {
-    method: 'HEAD'
-  })
-    .then(res => {
-      if (res.ok) {
-        return res;
-      }
-
-      return Promise.reject(`Ошибка: ${res.status}`);
-    });
-}
-
-export { getUserInfo, getInitialCards, patchProfile, postNewCard, deleteCard, putLike, deleteLike, patchAvatar, checkImageUrl };
+export { getUserInfo, getInitialCards, patchProfile, postNewCard, deleteCard, putLike, deleteLike, patchAvatar };

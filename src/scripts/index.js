@@ -1,9 +1,8 @@
 import '../pages/index.css';
 import { makeCard, likeCard } from './card';
 import { openModal, closeModal } from './modal';
-import { handleEditProfileFormSubmit } from './forms';
 import { enableValidation, clearValidation } from './validation';
-import { getUserInfo, getInitialCards, patchProfile, postNewCard, deleteCard, patchAvatar, checkImageUrl } from './api';
+import { getUserInfo, getInitialCards, patchProfile, postNewCard, deleteCard, patchAvatar } from './api';
 
 const placesList = document.querySelector('.places__list');
 const modals = document.querySelectorAll('.popup');
@@ -40,6 +39,10 @@ const editAvatarSubmitButton = editAvatarForm.querySelector('.popup__button');
 const popupImageElement = document.querySelector('.popup__image');
 const popupCaptionElement = document.querySelector('.popup__caption');
 
+const confirmDeleteModal = document.querySelector('.popup_type_confirm-delete');
+const confirmDeleteForm = document.forms['confirm-delete'];
+const confirmDeleteSubmitButton = confirmDeleteForm.querySelector('.popup__button');
+
 const validationConfig = {
   formSelector: '.popup__form',
   inputSelector: '.popup__input',
@@ -49,25 +52,12 @@ const validationConfig = {
   errorClass: 'popup__input-error_active'
 };
 
-const userData = getUserInfo()
-  .then(userData => {
-    return userData;
-  })
-  .catch(err => {
-    console.error(err);
-  });
-
-const initialCards = getInitialCards()
-  .then(initialCards => {
-    return initialCards;
-  })
-  .catch(err => {
-    console.error(err);
-  });
-
 let userId = undefined;
 
-Promise.all([userData, initialCards])
+let cardToDelete = undefined;
+let cardElementToDelete = undefined;
+
+Promise.all([getUserInfo(), getInitialCards()])
   .then(([userData, initialCards]) => {
     profileTitle.textContent = userData.name;
     profileDescription.textContent = userData.about;
@@ -81,21 +71,25 @@ Promise.all([userData, initialCards])
     console.error(err);
   });
 
-const setImageToModal = evt => {
-  const currentImage = evt.currentTarget;
-
-  popupImageElement.src = currentImage.src;
-  popupImageElement.alt = currentImage.alt;
-  popupCaptionElement.textContent = currentImage.alt;
+const setImageToModal = ({ name, link }) => {
+  popupImageElement.src = link;
+  popupImageElement.alt = name;
+  popupCaptionElement.textContent = name;
 };
 
-const handleImageClick = evt => {
-  setImageToModal(evt);
+const handleImageClick = ({ name, link }) => {
+  setImageToModal({ name, link });
   openModal(showImageModal);
 };
 
+const handleDeleteClick = (cardData, cardElement) => {
+  openModal(confirmDeleteModal);
+  cardToDelete = cardData;
+  cardElementToDelete = cardElement;
+};
+
 const cardFuncs = {
-  deleteFunc: deleteCard,
+  deleteFunc: handleDeleteClick,
   likeFunc: likeCard,
   imageFunc: handleImageClick
 };
@@ -138,13 +132,16 @@ editProfileForm.addEventListener('submit', evt => {
 
   patchProfile(nameInput.value, descriptionInput.value)
     .then(newProfileData => {
-      handleEditProfileFormSubmit(newProfileData, profileTitle, profileDescription);
+      profileTitle.textContent = newProfileData.name;
+      profileDescription.textContent = newProfileData.about;
 
       closeModal(editProfileModal);
-      editProfileSubmitButton.textContent = 'Сохранить';
     })
     .catch(err => {
       console.error(err);
+    })
+    .finally(() => {
+      editProfileSubmitButton.textContent = 'Сохранить';
     });
 });
 
@@ -160,10 +157,12 @@ newPlaceForm.addEventListener('submit', evt => {
       clearValidation(newPlaceForm, validationConfig);
 
       closeModal(addNewCardModal);
-      newPlaceSubmitButton.textContent = 'Сохранить';
     })
     .catch(err => {
       console.error(err);
+    })
+    .finally(() => {
+      newPlaceSubmitButton.textContent = 'Сохранить';
     });
 });
 
@@ -171,23 +170,33 @@ editAvatarForm.addEventListener('submit', evt => {
   evt.preventDefault();
   editAvatarSubmitButton.textContent = 'Сохранение...';
 
-  checkImageUrl(newAvatarLinkInput.value)
-    .then(res => {
-      if (res.headers.get('content-type').startsWith('image/')) {
-        patchAvatar(newAvatarLinkInput.value)
-          .then(userData => {
-            profileImage.src = userData.avatar;
-
-            closeModal(editAvatarModal);
-            editAvatarSubmitButton.textContent = 'Сохранить';
-          })
-          .catch(err => {
-            console.error(err);
-          });
-      }
+  patchAvatar(newAvatarLinkInput.value)
+    .then(userData => {
+      profileImage.src = userData.avatar;
+      closeModal(editAvatarModal);
     })
     .catch(err => {
       console.error(err);
+    })
+    .finally(() => {
+      editAvatarSubmitButton.textContent = 'Сохранить';
+    });
+});
+
+confirmDeleteForm.addEventListener('submit', evt => {
+  evt.preventDefault();
+  confirmDeleteSubmitButton.textContent = 'Удаление...';
+
+  deleteCard(cardToDelete)
+    .then(() => {
+      cardElementToDelete.remove();
+      closeModal(confirmDeleteModal);
+    })
+    .catch(err => {
+      console.error(err);
+    })
+    .finally(() => {
+      confirmDeleteSubmitButton.textContent = 'Да';
     });
 });
 
